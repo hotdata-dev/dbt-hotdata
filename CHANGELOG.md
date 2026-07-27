@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `convert_timezone` returned the UTC instant unshifted; it now converts via
+  `to_local_time()` (DST-aware, non-UTC sources verified) and defaults a
+  falsy `source_tz` to UTC.
+
 ## [0.1.0] - 2026-07-27
 
 ### Added

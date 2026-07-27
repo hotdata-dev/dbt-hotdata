@@ -13,12 +13,16 @@
 {%- endmacro %}
 
 {% macro hotdata__convert_timezone(column, target_tz, source_tz) -%}
-  {#- dbt_date dispatch hook: DataFusion supports the Postgres double
-      AT TIME ZONE pattern, so delegate to it. -#}
-  cast(
-    cast({{ column }} as timestamp)
-    at time zone '{{ source_tz }}' at time zone '{{ target_tz }}'
-    as timestamp
+  {#-
+    dbt_date dispatch hook (packages need a root-project shim or dispatch
+    config to reach it). NOT the Postgres double-AT TIME ZONE pattern: on
+    DataFusion the final cast back to a naive timestamp re-renders the UTC
+    instant, silently losing the shift. to_local_time() yields the target
+    zone's wall clock (DST-aware).
+  -#}
+  to_local_time(
+    (cast({{ column }} as timestamp) at time zone '{{ source_tz }}')
+    at time zone '{{ target_tz }}'
   )
 {%- endmacro %}
 

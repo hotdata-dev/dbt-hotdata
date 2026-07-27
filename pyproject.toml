@@ -1,0 +1,94 @@
+[project]
+name = "dbt-hotdata"
+version = "0.1.0"
+description = "dbt adapter for Hotdata managed databases."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+    { email = "669988+eddietejeda@users.noreply.github.com" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    # The adapter subclasses dbt-adapters internals (SQLAdapter,
+    # SQLConnectionManager, BaseRelation) that shift between minors, so cap the
+    # major and track the tested minor floor. dbt-core is what runs the adapter;
+    # it is listed so `pip install dbt-hotdata` yields a working `dbt`.
+    "dbt-adapters>=1.16,<2",
+    "dbt-common>=1.14,<2",
+    "dbt-core>=1.10,<2",
+    # Managed-database lifecycle + retry-wrapped client come from the shared
+    # Hotdata SDK pair, same floors as hotdata-dlt-destination.
+    "hotdata>=0.8.0,<0.9",
+    "hotdata-framework>=0.9.0,<0.10",
+    "pyarrow>=14",
+]
+
+[project.urls]
+Homepage = "https://hotdata.dev"
+Repository = "https://github.com/hotdata-dev/dbt-hotdata"
+Changelog = "https://github.com/hotdata-dev/dbt-hotdata/blob/main/CHANGELOG.md"
+Issues = "https://github.com/hotdata-dev/dbt-hotdata/issues"
+
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+# PEP 420 namespace packages: dbt/adapters/hotdata + dbt/include/hotdata.
+# dbt discovers the adapter by importing dbt.adapters.hotdata — no entry points.
+packages = ["dbt"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "mypy>=1.11",
+    "ruff>=0.8",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "integration: requires live Hotdata credentials",
+]
+
+[tool.mypy]
+# 3.12, not the 3.11 floor: numpy's stubs use `type` statements that mypy
+# only parses on 3.12+ grammar.
+python_version = "3.12"
+files = ["dbt/adapters/hotdata", "tests"]
+namespace_packages = true
+explicit_package_bases = true
+check_untyped_defs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+# dbt-adapters ships loosely-typed base classes (untyped decorators, Any-heavy
+# contracts), so full strict mode is not attainable for an adapter.
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+
+[[tool.mypy.overrides]]
+module = [
+    "agate.*",
+    "hotdata.*",
+    "hotdata_framework.*",
+    "dbt.*",
+    "dbt_common.*",
+    "pyarrow.*",
+]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "UP", "N", "C4", "DTZ", "T20", "RET", "SIM", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["N814"]

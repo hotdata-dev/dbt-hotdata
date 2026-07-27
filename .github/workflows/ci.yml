@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install
+        run: uv sync
+      - name: Lint
+        run: uv run ruff check dbt tests
+      - name: Format
+        run: uv run ruff format --check dbt tests
+      - name: Type-check
+        run: uv run mypy
+      - name: Test (offline)
+        run: uv run pytest -q
+
+  wheel-contents:
+    # The adapter ships as PEP 420 namespace packages (dbt/adapters/hotdata +
+    # dbt/include/hotdata). A packaging change that drops the macros or config
+    # files produces a wheel that imports fine but cannot run a single model —
+    # so assert the contents explicitly.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Build
+        run: uv build
+      - name: Assert wheel contents
+        run: |
+          python3 - <<'EOF'
+          import glob, sys, zipfile
+
+          wheel = glob.glob("dist/*.whl")[0]
+          names = set(zipfile.ZipFile(wheel).namelist())
+          required = [
+              "dbt/adapters/hotdata/__init__.py",
+              "dbt/adapters/hotdata/__version__.py",
+              "dbt/adapters/hotdata/client.py",
+              "dbt/adapters/hotdata/column.py",
+              "dbt/adapters/hotdata/connections.py",
+              "dbt/adapters/hotdata/credentials.py",
+              "dbt/adapters/hotdata/impl.py",
+              "dbt/adapters/hotdata/relation.py",
+              "dbt/adapters/hotdata/seeds.py",
+              "dbt/include/hotdata/__init__.py",
+              "dbt/include/hotdata/dbt_project.yml",
+              "dbt/include/hotdata/profile_template.yml",
+              "dbt/include/hotdata/macros/adapters.sql",
+              "dbt/include/hotdata/macros/materializations/table.sql",
+              "dbt/include/hotdata/macros/materializations/incremental.sql",
+              "dbt/include/hotdata/macros/materializations/seed.sql",
+              "dbt/include/hotdata/macros/materializations/view.sql",
+              "dbt/include/hotdata/macros/materializations/snapshot.sql",
+          ]
+          missing = [name for name in required if name not in names]
+          if missing:
+              sys.exit(f"wheel {wheel} is missing: {missing}")
+          print(f"ok: {wheel} contains all {len(required)} required files")
+          EOF

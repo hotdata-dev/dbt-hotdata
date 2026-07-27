@@ -1,0 +1,14 @@
+fixed:
+  type: hotdata
+prompts:
+  workspace_id:
+    hint: 'your Hotdata workspace id (routing, not a secret)'
+  database_id:
+    hint: 'id of an existing managed database; leave blank to create one on first run (its id is printed — pin it here afterwards)'
+  schema:
+    hint: 'schema inside the managed database'
+    default: public
+  threads:
+    hint: 'loads into one database serialize server-side; 1 is the safe default'
+    type: 'int'
+    default: 1

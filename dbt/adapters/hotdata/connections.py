@@ -2,7 +2,7 @@
 
 There is no database driver here: a "connection" is an HTTPS client
 (:class:`HotdataDbtClient`), SQL executes server-side on Apache DataFusion
-(Postgres dialect) scoped to the run's managed database, and results come
+(Postgres dialect) scoped to the run's instant database, and results come
 back as Arrow. Consequences for the dbt contract:
 
 * ``begin``/``commit`` are no-ops — the engine has no transactions.

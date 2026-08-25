@@ -4,7 +4,7 @@ Builds on :class:`hotdata_framework.managed_client.ManagedDatabaseClient` (the
 shared client behind hotdata-dlt-destination and hotdata-airflow) and adds the
 adapter's addressing rules:
 
-* **Id-first.** A managed database is identified by its id, never by name —
+* **Id-first.** An instant database is identified by its id, never by name —
   Hotdata names are not unique. A pinned ``database_id`` is fetched once via
   ``GET /databases/{id}``; there is deliberately no by-name lookup.
 * **Create on first run.** With no ``database_id`` and
@@ -143,13 +143,13 @@ class HotdataDbtClient(ManagedDatabaseClient):
         # Loud on purpose: without pinning this id, the next run creates
         # another database (names are labels, not identifiers).
         logger.warning(
-            f"hotdata: created managed database {db.id} (name={self._database_label!r}). "
+            f"hotdata: created instant database {db.id} (name={self._database_label!r}). "
             f"Pin it for future runs by setting database_id: {db.id} in profiles.yml."
         )
         return db
 
     def database(self, *, create: bool = True) -> ManagedDatabase | None:
-        """Resolve the run's managed database (id-first), creating if allowed.
+        """Resolve the run's instant database (id-first), creating if allowed.
 
         ``create=False`` is the probe form used by metadata calls before any
         model has run: it never creates and returns ``None`` when nothing is
@@ -168,7 +168,7 @@ class HotdataDbtClient(ManagedDatabaseClient):
                     # recreated, so this is terminal, not a silent recreate.
                     raise HotdataTerminalError(
                         f"configured database_id {self._database_id!r} was not found "
-                        "(it may have been dropped). A managed database cannot be "
+                        "(it may have been dropped). An instant database cannot be "
                         "recreated with the same id — unset database_id to create a "
                         "new one, or pin an existing id."
                     ) from None
@@ -178,7 +178,7 @@ class HotdataDbtClient(ManagedDatabaseClient):
                 db = self._create_database()
             else:
                 raise HotdataTerminalError(
-                    "no managed database is configured: set database_id: in "
+                    "no instant database is configured: set database_id: in "
                     "profiles.yml, or set create_database_if_missing: true to "
                     "create one on first run."
                 )
@@ -194,7 +194,7 @@ class HotdataDbtClient(ManagedDatabaseClient):
     def _database_gone(self, db: ManagedDatabase) -> HotdataTerminalError:
         self._invalidate_resolution()
         return HotdataTerminalError(
-            f"managed database {db.id} was not found — it appears to have been "
+            f"instant database {db.id} was not found — it appears to have been "
             "dropped while this run was using it."
         )
 

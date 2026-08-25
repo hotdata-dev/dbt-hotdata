@@ -4,7 +4,7 @@
 [![dbt](https://img.shields.io/badge/dbt-1.10%2B-orange.svg)](https://www.getdbt.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Transform data in [Hotdata](https://hotdata.dev) managed databases with [dbt](https://www.getdbt.com) — the companion to [hotdata-dlt-destination](https://github.com/hotdata-dev/hotdata-dlt-destination) for the T in ELT.
+Transform data in [Hotdata](https://hotdata.dev) instant databases with [dbt](https://www.getdbt.com) — the companion to [hotdata-dlt-destination](https://github.com/hotdata-dev/hotdata-dlt-destination) for the T in ELT.
 
 Hotdata is a managed analytics engine (Apache DataFusion, Postgres-dialect SQL) with **no DDL surface**: tables are created by loading data, not by `CREATE TABLE`. This adapter embraces that. Every model runs as the Chain pattern, entirely against the API:
 
@@ -75,14 +75,14 @@ Then:
 dbt run
 ```
 
-On first run, a managed database labelled `dbt` is created automatically and its **id** is printed:
+On first run, an instant database labelled `dbt` is created automatically and its **id** is printed:
 
 ```
-hotdata: created managed database db_abc123 (name='dbt'). Pin it for future runs by
+hotdata: created instant database db_abc123 (name='dbt'). Pin it for future runs by
 setting database_id: db_abc123 in profiles.yml.
 ```
 
-Managed databases are addressed by id — Hotdata database names are not unique, so a name can't identify one. Pin `database_id` in the profile to keep building into the same database; without it, each run creates a fresh one (useful for CI or per-branch runs — databases can be set to expire).
+Instant databases are addressed by id — Hotdata database names are not unique, so a name can't identify one. Pin `database_id` in the profile to keep building into the same database; without it, each run creates a fresh one (useful for CI or per-branch runs — databases can be set to expire).
 
 ### An incremental model
 
@@ -142,16 +142,16 @@ Schema evolution is additive and automatic: a model that starts producing a new 
 |---|---|---|---|
 | `api_key` | `HOTDATA_API_KEY` | required | API key (a secret — prefer the env var or `"{{ env_var('HOTDATA_API_KEY') }}"`) |
 | `workspace_id` | — | required | Workspace ID (routing, not a secret) |
-| `database_id` | — | — | Id of the managed database to build into. **This is how a database is targeted** — names aren't unique. Printed on first-run create; pin it to reuse |
+| `database_id` | — | — | Id of the instant database to build into. **This is how a database is targeted** — names aren't unique. Printed on first-run create; pin it to reuse |
 | `database_name` | — | `dbt` | Display label used **only when creating** a new database (never to look one up) |
-| `schema` | — | `public` | Schema inside the managed database |
+| `schema` | — | `public` | Schema inside the instant database |
 | `create_database_if_missing` | — | `true` | Create a database on first run when no `database_id` is pinned |
 | `api_base_url` | — | `https://api.hotdata.dev` | API endpoint |
 | `max_retries` | — | `8` | Retry budget for transient errors (409/429/5xx). Loads take a catalog-level lock per database; ~42s of linear backoff outlasts a concurrent writer |
 | `retry_backoff_seconds` | — | `1.5` | Initial retry wait (grows linearly) |
 | `threads` | — | `1` | Loads into one database serialize server-side (contention is retried); more threads still help when models spend most of their time in query execution |
 
-`database:` stays unset — inside a managed database the SQL catalog is always literally `default` (relations render as `"default"."schema"."table"`), and the adapter rejects any other value up front.
+`database:` stays unset — inside an instant database the SQL catalog is always literally `default` (relations render as `"default"."schema"."table"`), and the adapter rejects any other value up front.
 
 ## How it relates to hotdata-dlt-destination
 

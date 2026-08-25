@@ -1,7 +1,7 @@
 [project]
 name = "dbt-hotdata"
 version = "0.1.0"
-description = "dbt adapter for Hotdata managed databases."
+description = "dbt adapter for Hotdata instant databases."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
@@ -17,7 +17,7 @@ dependencies = [
     "dbt-adapters>=1.16,<2",
     "dbt-common>=1.14,<2",
     "dbt-core>=1.10,<2",
-    # Managed-database lifecycle + retry-wrapped client come from the shared
+    # Instant-database lifecycle + retry-wrapped client come from the shared
     # Hotdata SDK pair, same floors as hotdata-dlt-destination.
     "hotdata>=0.8.0,<0.9",
     "hotdata-framework>=0.9.0,<0.10",

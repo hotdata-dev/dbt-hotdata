@@ -12,7 +12,7 @@ from dbt_common.exceptions import DbtRuntimeError
 class HotdataCredentials(Credentials):
     """Profile (`profiles.yml`) fields for the `hotdata` adapter.
 
-    Addressing follows the Hotdata id-first convention: a managed database is
+    Addressing follows the Hotdata id-first convention: an instant database is
     identified by its **id**, never by name (names are not unique). With no
     ``database_id`` and ``create_database_if_missing`` (the default), the first
     run creates a database labelled ``database_name`` and logs its id — pin
@@ -23,9 +23,9 @@ class HotdataCredentials(Credentials):
     workspace id is routing, not a credential — it is a plain profile field.
     """
 
-    # dbt's relation namespace. Inside a managed database the SQL catalog is
+    # dbt's relation namespace. Inside an instant database the SQL catalog is
     # always literally "default" ("default"."<schema>"."<table>"), so this stays
-    # fixed; the managed database itself is selected by database_id below.
+    # fixed; the instant database itself is selected by database_id below.
     database: str = "default"
     schema: str = "public"
 
@@ -97,8 +97,8 @@ class HotdataCredentials(Credentials):
         if self.database and self.database != "default":
             raise DbtRuntimeError(
                 f"hotdata profile sets database={self.database!r}, but the SQL catalog "
-                "inside a Hotdata managed database is always 'default'. Select the "
-                "managed database with database_id: instead, and leave database: unset."
+                "inside a Hotdata instant database is always 'default'. Select the "
+                "instant database with database_id: instead, and leave database: unset."
             )
 
 

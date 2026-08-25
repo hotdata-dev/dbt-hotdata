@@ -8,7 +8,7 @@ API-shaped reality.
 Hotdata is a managed engine (Apache DataFusion, Postgres-dialect SQL over
 HTTPS) with **no DDL surface**:
 
-- Queries: `POST /query` scoped to a managed database (`X-Database-Id`),
+- Queries: `POST /query` scoped to an instant database (`X-Database-Id`),
   polled to completion, result fetched as Arrow. SELECT only — no
   `CREATE TABLE AS`, no `INSERT`, no `ALTER`, no transactions, no bind
   parameters, no rename.
@@ -103,7 +103,7 @@ Failing up front with the fix beats failing mid-run with an engine error:
   parameterized queries → explicit errors explaining the constraint.
 - Credentials are validated at connection open, naming each missing field.
 - `database:` in the profile other than `default` is rejected at parse time
-  — the managed database is selected by `database_id`, never in SQL.
+  — the instant database is selected by `database_id`, never in SQL.
 
 ## Testing
 

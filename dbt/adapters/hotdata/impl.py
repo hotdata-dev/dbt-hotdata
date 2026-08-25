@@ -1,7 +1,7 @@
 """Hotdata dbt adapter.
 
 Hotdata has no DDL surface — tables are created by declaring them on the
-managed database and loading parquet, and queries run server-side (Apache
+instant database and loading parquet, and queries run server-side (Apache
 DataFusion, Postgres dialect) returning Arrow. The adapter therefore keeps
 all metadata and materialization work in Python:
 

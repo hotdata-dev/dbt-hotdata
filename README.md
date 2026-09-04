@@ -141,21 +141,27 @@ Schema evolution is additive and automatic: a model that starts producing a new 
 | Profile field | Env variable | Default | Description |
 |---|---|---|---|
 | `api_key` | `HOTDATA_API_KEY` | required | API key (a secret — prefer the env var or `"{{ env_var('HOTDATA_API_KEY') }}"`) |
-| `workspace_id` | — | required | Workspace ID (routing, not a secret) |
-| `database_id` | — | — | Id of the instant database to build into. **This is how a database is targeted** — names aren't unique. Printed on first-run create; pin it to reuse |
+| `workspace_id` | `HOTDATA_WORKSPACE` | required | Workspace ID (routing, not a secret) |
+| `database_id` | `HOTDATA_DATABASE` | — | Id of the instant database to build into. **This is how a database is targeted** — names aren't unique. Printed on first-run create; pin it to reuse |
 | `database_name` | — | `dbt` | Display label used **only when creating** a new database (never to look one up) |
 | `schema` | — | `public` | Schema inside the instant database |
 | `create_database_if_missing` | — | `true` | Create a database on first run when no `database_id` is pinned |
-| `api_base_url` | — | `https://api.hotdata.dev` | API endpoint |
+| `api_base_url` | `HOTDATA_API_URL` | `https://api.hotdata.dev` | API endpoint |
 | `max_retries` | — | `8` | Retry budget for transient errors (409/429/5xx). Loads take a catalog-level lock per database; ~42s of linear backoff outlasts a concurrent writer |
 | `retry_backoff_seconds` | — | `1.5` | Initial retry wait (grows linearly) |
 | `threads` | — | `1` | Loads into one database serialize server-side (contention is retried); more threads still help when models spend most of their time in query execution |
 
 `database:` stays unset — inside an instant database the SQL catalog is always literally `default` (relations render as `"default"."schema"."table"`), and the adapter rejects any other value up front.
 
+Fields left unset in the profile resolve from the platform's own `HOTDATA_*` environment variables (explicit profile values always win). These are the Hotdata CLI conventions — under any orchestrator that sets them, the adapter needs no profile fields at all beyond `type: hotdata`. A `database_id` adopted from the environment is logged, since it retargets the whole build.
+
 ## How it relates to hotdata-dlt-destination
 
 [hotdata-dlt-destination](https://github.com/hotdata-dev/hotdata-dlt-destination) loads external data **into** Hotdata (the EL); this adapter transforms it **inside** Hotdata (the T). They share the same conventions — `HOTDATA_API_KEY` from the environment, `workspace_id` as a plain parameter, id-first `database_id` addressing, the same retry classification — and the same underlying SDK (`hotdata` + `hotdata-framework`). Point dbt at the `database_id` your dlt pipeline prints, add sources for the loaded tables, and build models on top.
+
+### Running after a dlt load
+
+[hotdata-dlt-destination](https://github.com/hotdata-dev/hotdata-dlt-destination) ships a dbt bridge: after a pipeline run, one helper call executes a dbt package against the exact instant database the load just wrote — no profiles.yml to author, credentials and routing reused from the pipeline. See “Transform with dbt” in that repo's README. This adapter itself knows nothing about dlt; the bridge drives it through the `HOTDATA_*` environment contract above.
 
 ## Development
 

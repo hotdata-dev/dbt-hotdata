@@ -1,9 +1,20 @@
 from __future__ import annotations
 
+import os
+
 import pyarrow as pa
 import pytest
 
 from dbt.adapters.hotdata.credentials import HotdataCredentials
+
+
+@pytest.fixture(autouse=True)
+def _isolate_ambient_env(monkeypatch):
+    """Credentials resolve unset fields from HOTDATA_* environment variables,
+    so a developer's real environment must never leak into tests."""
+    for name in list(os.environ):
+        if name.startswith("HOTDATA_"):
+            monkeypatch.delenv(name, raising=False)
 
 
 @pytest.fixture

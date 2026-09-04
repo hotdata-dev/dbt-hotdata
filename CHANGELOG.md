@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Ambient-environment fallbacks for profile fields from the platform's own
+  `HOTDATA_*` variables (explicit profile values always win): the API key
+  from `HOTDATA_API_KEY`, `workspace_id` from `HOTDATA_WORKSPACE`,
+  `database_id` from `HOTDATA_DATABASE`, and `api_base_url` from
+  `HOTDATA_API_URL`. Resolution reuses the `hotdata_framework.env` helpers,
+  so URLs are normalized the same way as every other SDK consumer. A dbt
+  project runs with no profile fields beyond `type: hotdata` when the
+  environment provides the rest, and orchestrator bridges (e.g.
+  hotdata-dlt-destination's dbt bridge) drive the adapter through the same
+  contract. A `database_id` adopted from the environment is logged, since it
+  retargets the whole build.
+
 ### Fixed
 
 - `convert_timezone` returned the UTC instant unshifted; it now converts via

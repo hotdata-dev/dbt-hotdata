@@ -52,10 +52,11 @@ class HotdataCredentials(Credentials):
     database_id: str | None = None
     database_name: str = "dbt"
     create_database_if_missing: bool = True
-    # None means "unset": resolved in __post_init__ via default_host(), which
+    # "" means "unset": resolved in __post_init__ via default_host(), which
     # reads HOTDATA_API_URL and falls back to the platform default. An explicit
-    # value always wins over the environment.
-    api_base_url: str | None = None
+    # value always wins over the environment. Typed str (not Optional) because
+    # __post_init__ guarantees a value before anyone reads it.
+    api_base_url: str = ""
     # Loads take a catalog-level lock per database, so a concurrent writer can
     # hold 409s for tens of seconds — the budget must outlast that, not just
     # blips. 8 attempts x 1.5s linear backoff ~= 42s.
@@ -70,7 +71,7 @@ class HotdataCredentials(Credentials):
 
     @property
     def unique_field(self) -> str:
-        return self.workspace_id or self.api_base_url or default_host()
+        return self.workspace_id or self.api_base_url
 
     def _connection_keys(self) -> tuple[str, ...]:
         # api_key deliberately omitted: these are echoed by `dbt debug`.

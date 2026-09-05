@@ -4,7 +4,7 @@
 [![dbt](https://img.shields.io/badge/dbt-1.10%2B-orange.svg)](https://www.getdbt.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Transform data in [Hotdata](https://hotdata.dev) instant databases with [dbt](https://www.getdbt.com) — the companion to [hotdata-dlt-destination](https://github.com/hotdata-dev/hotdata-dlt-destination) for the T in ELT.
+Transform data in [Hotdata](https://hotdata.dev) instant databases with [dbt](https://www.getdbt.com).
 
 Hotdata is a managed analytics engine (Apache DataFusion, Postgres-dialect SQL) with **no DDL surface**: tables are created by loading data, not by `CREATE TABLE`. This adapter embraces that. Every model runs as the Chain pattern, entirely against the API:
 

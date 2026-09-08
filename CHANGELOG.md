@@ -41,7 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `dbt docs generate`.
 - Id-first database addressing: pin `database_id` in the profile, or let the
   first run create a database and print its id.
-- Cross-database macros for DataFusion's SQL surface: `dateadd`, `datediff`,
+- Cross-database macros for HotSQL: `dateadd`, `datediff`,
   `convert_timezone`.
 - Transient API errors (409/429/5xx) retry for ~42s via the shared
   `hotdata-framework` client; terminal errors fail the node immediately.

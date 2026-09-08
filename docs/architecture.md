@@ -5,8 +5,8 @@ API-shaped reality.
 
 ## The constraint that shapes everything
 
-Hotdata is a managed engine (Apache DataFusion, Postgres-dialect SQL over
-HTTPS) with **no DDL surface**:
+Hotdata is a managed engine ([HotSQL](https://www.hotdata.dev/docs/sql),
+Postgres-familiar SQL over HTTPS) with **no DDL surface**:
 
 - Queries: `POST /query` scoped to an instant database (`X-Database-Id`),
   polled to completion, result fetched as Arrow. SELECT only — no

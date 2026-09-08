@@ -1,9 +1,9 @@
 {#
-  Cross-database macro overrides for DataFusion's Postgres surface.
+  Cross-database macro overrides for HotSQL.
 
   dbt's default__ implementations of dateadd/datediff emit Snowflake-style
   function calls (`dateadd('day', 5, x)`, `datediff('day', a, b)`) that
-  DataFusion does not have. These rebuild them from constructs it does have:
+  HotSQL does not have. These rebuild them from constructs it does have:
   string-built interval casts (dynamic-safe: `x + cast(concat(n, ' days') as
   interval)`) and integer date subtraction (`date - date` -> whole days).
 #}
@@ -16,7 +16,7 @@
   {#-
     dbt_date dispatch hook (packages need a root-project shim or dispatch
     config to reach it). NOT the Postgres double-AT TIME ZONE + cast-to-naive
-    pattern: on DataFusion that final cast re-renders the UTC instant,
+    pattern: on HotSQL that final cast re-renders the UTC instant,
     silently losing the shift. Here AT TIME ZONE on a naive timestamp
     localizes it as the source zone's wall clock (12:00 @ America/New_York
     -> 12:00-05:00, verified — non-UTC sources convert correctly), and

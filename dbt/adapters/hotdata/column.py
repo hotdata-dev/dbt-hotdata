@@ -7,7 +7,7 @@ from dbt.adapters.base.column import Column
 
 
 def dtype_from_arrow(arrow_type: pa.DataType) -> str:
-    """Render an Arrow type as the Postgres-surface name DataFusion presents.
+    """Render an Arrow type as the SQL type name HotSQL presents.
 
     Used when describing relations: the engine returns Arrow schemas, and dbt
     (docs, `{{ col.data_type }}`, schema tests) expects SQL type names.
@@ -43,7 +43,7 @@ def dtype_from_arrow(arrow_type: pa.DataType) -> str:
     if (
         pa.types.is_string(arrow_type)
         or pa.types.is_large_string(arrow_type)
-        # DataFusion reads loaded string columns back as Utf8View; the SQL
+        # The engine reads loaded string columns back as Utf8View; the SQL
         # name must still be a castable one, never "string_view".
         or pa.types.is_string_view(arrow_type)
     ):
@@ -57,7 +57,7 @@ def dtype_from_arrow(arrow_type: pa.DataType) -> str:
 class HotdataColumn(Column):
     @classmethod
     def string_type(cls, size: int) -> str:
-        # The base class renders "character varying(256)", which DataFusion
+        # The base class renders "character varying(256)", which HotSQL
         # rejects in casts; strings are unbounded here.
         return "varchar"
 

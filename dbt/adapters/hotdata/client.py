@@ -17,7 +17,7 @@ adapter's addressing rules:
   ``dbtRunner.invoke()`` in the same process gets fresh credentials and
   resolves fresh — nothing can serve a stale or differently-configured record.
 
-Every SQL statement is executed server-side (Apache DataFusion, Postgres
+Every SQL statement is executed server-side (HotSQL, a Postgres-familiar
 dialect) scoped to the resolved database, and results come back as Arrow.
 There is no DDL surface: tables are created by declaring them and loading
 parquet (``replace`` / ``append`` / ``upsert`` / ``delete`` modes).

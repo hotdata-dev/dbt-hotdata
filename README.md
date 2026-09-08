@@ -6,7 +6,7 @@
 
 Transform data in [Hotdata](https://hotdata.dev) instant databases with [dbt](https://www.getdbt.com).
 
-Hotdata is a managed analytics engine (Apache DataFusion, Postgres-dialect SQL) with **no DDL surface**: tables are created by loading data, not by `CREATE TABLE`. This adapter embraces that. Every model runs as the Chain pattern, entirely against the API:
+Hotdata is a managed analytics engine speaking [HotSQL](https://www.hotdata.dev/docs/sql) (standard SQL with analytics extensions — if you know Postgres, you already know most of it) with **no DDL surface**: tables are created by loading data, not by `CREATE TABLE`. This adapter embraces that. Every model runs as the Chain pattern, entirely against the API:
 
 1. the model's compiled `SELECT` executes **server-side**,
 2. the result streams back as Arrow,
@@ -28,7 +28,7 @@ No local database engine, no driver, no version matching — pure Python over HT
 
 ## Requirements
 
-- Python **3.11+**, dbt-core **1.10+**
+- Python **3.11+**, dbt-core **1.10+** (tested through 1.12)
 - A [Hotdata](https://hotdata.dev) workspace, an API key, and its workspace ID — from your Hotdata dashboard or the [Hotdata CLI](https://github.com/hotdata-dev/sdk-python).
 
 ## Install
@@ -119,6 +119,10 @@ Tests, `dbt show`, analyses, and source freshness all run as plain SELECTs on th
 
 Schema evolution is additive and automatic: a model that starts producing a new column just includes it in the next load — existing data is never touched, and types can widen but never silently shrink. (`on_schema_change` is therefore ignored.)
 
+### SQL dialect
+
+Write models in [HotSQL](https://www.hotdata.dev/docs/sql). It is Postgres-familiar, so SQL written for Postgres mostly runs unchanged, and the adapter overrides the cross-database macros (`dateadd`, `datediff`, `convert_timezone`) where HotSQL differs. Hotdata's query API also accepts the Postgres, DuckDB, and Snowflake dialects (translated to HotSQL server-side), but this adapter always submits model SQL as native HotSQL.
+
 ## Feature support
 
 | Feature | Support | Notes |
@@ -129,11 +133,12 @@ Schema evolution is additive and automatic: a model that starts producing a new 
 | Tests (generic + singular) | ✅ | Run server-side; `store_failures` supported |
 | `dbt docs generate` | ✅ | Catalog from the managed-table API |
 | Source freshness | ✅ | `loaded_at_field` queries run server-side |
+| Cross-database macros | ✅ | `dateadd`, `datediff`, `convert_timezone` implemented for [HotSQL](https://www.hotdata.dev/docs/sql) (`convert_timezone` is DST-aware) |
 | Hooks (`pre-hook`/`post-hook`, `on-run-*`) | ⚠️ | Run server-side — SELECT-shaped SQL only (no DDL exists) |
 | Python models | ❌ | |
 | Model contracts / constraints | ❌ | No DDL; dbt warns they are unenforced |
 | Grants | ❌ | Ignored with a warning — access is governed by workspace API keys |
-| Transactions | ❌ | `begin`/`commit` are no-ops (DataFusion has no transactions) |
+| Transactions | ❌ | `begin`/`commit` are no-ops (Hotdata has no transactions) |
 | Query cancellation | ❌ | An in-flight HTTPS query can't be interrupted client-side |
 
 ## Configuration

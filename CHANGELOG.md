@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] - 2026-09-09
+
+### Changed
+
+- Raised the Hotdata SDK ceilings to `hotdata<0.10` and
+  `hotdata-framework<0.15`, allowing the newest coherent pair (hotdata 0.9.x +
+  framework 0.14.x). Verified against a live workspace: full dbt run and test
+  suite pass with hotdata 0.9.1 + hotdata-framework 0.14.0.
+
+## [0.2.1] - 2026-09-09
+
+### Changed
+
+- Version bump only, to produce the first PyPI release via the tag-triggered
+  release workflow.
+
 ## [0.2.0] - 2026-09-08
 
 ### Added
